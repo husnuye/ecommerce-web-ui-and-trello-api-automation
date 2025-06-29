@@ -1,0 +1,5 @@
+{
+    "BaseUrl": "https://api.trello.com/1/",
+    "ApiKey": "your_api_key_here",
+    "Token": "your_token_here"
+  }
