@@ -102,10 +102,17 @@ Board deleted.
 **EN:**
 Pull requests are welcome. Feel free to contribute with additional features, models, or test scenarios.
 
-**TR:**
+**EN:**
 Pull request'ler açıktır. Ek işlemler, model ya da test senaryoları eklemekten çekinmeyin.
 
 ---
+
+**EN:**
+📌 To run the tests, copy `api.settings.sample.json` → `api.settings.json` and fill in your own Trello credentials.
+
+
+**EN:**
+📌 Testleri çalıştırmak için `api.settings.sample.json` dosyasını `api.settings.json` olarak kopyalayın ve kendi Trello bilgilerinizi girin.
 
 ## 🌍 License / Lisans
 
