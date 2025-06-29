@@ -54,4 +54,4 @@ TestResult.xml
 nunit-*.xml
 
 # Local secrets
-Config/api.settings.json
+Config/api.settings.jsonApiTests/Config/api.settings.json
