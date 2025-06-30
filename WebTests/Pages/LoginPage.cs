@@ -1,26 +1,37 @@
 using OpenQA.Selenium;
+using NUnit.Framework;
 
 namespace WebTests.Pages
 {
-    /// <summary>
-    /// Handles login functionality for Zara.
-    /// </summary>
     public class LoginPage : BasePage
     {
-        private readonly By EmailInput = By.Id("logonId");
-        private readonly By PasswordInput = By.Id("logonPassword");
-        private readonly By LoginButton = By.CssSelector("button[data-testid='login-button']");
-
         public LoginPage(IWebDriver driver) : base(driver) { }
 
-        /// <summary>
-        /// Performs login using provided credentials.
-        /// </summary>
+        private readonly By EmailInput = By.CssSelector("input[autocomplete='email']");
+        private readonly By PasswordInput = By.CssSelector("input[type='password']");
+        private readonly By SubmitButton = By.CssSelector("button[data-qa-id='logon-form-submit']");
+
         public void Login(string email, string password)
         {
+            TestContext.WriteLine("🔐 LoginPage.Login STARTED");
+            TestContext.WriteLine("Active window title: " + driver.Title);
+            TestContext.WriteLine("Active window handles: " + string.Join(",", driver.WindowHandles));
+
+            WaitUntilVisible(EmailInput);
             Type(EmailInput, email);
+            Thread.Sleep(1000);
+
+            WaitUntilVisible(PasswordInput);
             Type(PasswordInput, password);
-            Click(LoginButton);
+
+            TestContext.WriteLine("Before submit: email and password fields filled.");
+            Thread.Sleep(3000);
+
+            SafeClick(SubmitButton);
+
+            Thread.Sleep(3000);
+            TestContext.WriteLine("After submit: submit button clicked.");
+            TestContext.WriteLine("✅ Login form submitted.");
         }
     }
 }

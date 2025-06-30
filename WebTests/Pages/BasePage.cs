@@ -4,6 +4,7 @@ using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 using System;
 using System.Linq;
+using NUnit.Framework; // For TestContext
 
 namespace WebTests.Pages
 {
@@ -43,7 +44,7 @@ namespace WebTests.Pages
         }
 
         /// <summary>
-        /// Scrolls element into view using JS.
+        /// Scrolls element into view using JavaScript.
         /// </summary>
         protected void ScrollTo(By by)
         {
@@ -52,7 +53,7 @@ namespace WebTests.Pages
         }
 
         /// <summary>
-        /// Types into an input field after clearing it.
+        /// Clears the input field and types the provided text.
         /// </summary>
         protected void Type(By by, string text)
         {
@@ -62,23 +63,26 @@ namespace WebTests.Pages
         }
 
         /// <summary>
-        /// Waits until element is visible.
+        /// Waits until the element is visible in the DOM.
         /// </summary>
         protected IWebElement WaitAndFind(By by)
         {
             return wait.Until(ExpectedConditions.ElementIsVisible(by));
         }
 
-        /// <summary>
-        /// Waits until element is clickable.
-        /// </summary>
-        protected IWebElement WaitUntilClickable(By by)
-        {
-            return wait.Until(ExpectedConditions.ElementToBeClickable(by));
-        }
 
         /// <summary>
-        /// Returns true if element is visible.
+        /// Waits until the element is clickable (with optional timeout)
+        /// </summary>
+        protected IWebElement WaitUntilClickable(By by, int timeoutInSeconds = 10)
+        {
+            var customWait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutInSeconds));
+            return customWait.Until(ExpectedConditions.ElementToBeClickable(by));
+        }
+
+
+        /// <summary>
+        /// Returns true if the element is visible.
         /// </summary>
         protected bool IsVisible(By by)
         {
@@ -93,7 +97,7 @@ namespace WebTests.Pages
         }
 
         /// <summary>
-        /// Executes raw JavaScript on the browser.
+        /// Executes a custom JavaScript command.
         /// </summary>
         protected object ExecuteScript(string script, params object[] args)
         {
@@ -101,7 +105,7 @@ namespace WebTests.Pages
         }
 
         /// <summary>
-        /// Hovers over the given element.
+        /// Hovers the mouse over the specified element.
         /// </summary>
         protected void Hover(By by)
         {
@@ -110,7 +114,7 @@ namespace WebTests.Pages
         }
 
         /// <summary>
-        /// Waits until the given element contains specific text.
+        /// Waits until the element contains the specified text.
         /// </summary>
         protected void WaitUntilTextPresent(By by, string text)
         {
@@ -118,7 +122,7 @@ namespace WebTests.Pages
         }
 
         /// <summary>
-        /// Waits until page readyState is 'complete'.
+        /// Waits until the page is fully loaded (document.readyState = 'complete').
         /// </summary>
         protected void WaitForPageLoad()
         {
@@ -126,7 +130,7 @@ namespace WebTests.Pages
         }
 
         /// <summary>
-        /// Waits until a specific attribute on an element equals a given value.
+        /// Waits until a specific attribute on an element equals the given value.
         /// </summary>
         protected void WaitUntilAttributeEquals(By by, string attribute, string value)
         {
@@ -135,6 +139,78 @@ namespace WebTests.Pages
                 var element = driver.FindElement(by);
                 return element.GetAttribute(attribute) == value;
             });
+        }
+
+
+        /// <summary>
+        /// Waits until the specified element is visible and returns it.
+        /// </summary>
+        protected IWebElement WaitUntilVisible(By by, int timeoutInSeconds = 10)
+        {
+            var customWait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutInSeconds));
+            return customWait.Until(driver =>
+            {
+                var el = driver.FindElement(by);
+                return el.Displayed ? el : null;
+            });
+        }
+
+        /// <summary>
+        /// Safely scrolls to the element, moves mouse to it, and tries both normal and JS click.
+        /// </summary>
+
+        protected void SafeClick(By by)
+        {
+            Exception lastEx = null;
+            for (int i = 0; i < 3; i++)
+            {
+                try
+                {
+                    var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+                    var element = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(by));
+                    ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", element);
+                    actions.MoveToElement(element).Perform();
+                    element.Click();
+                    TestContext.WriteLine("[INFO] Clicked with mouse actions.");
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    lastEx = ex;
+                    TestContext.WriteLine($"[WARN] Click attempt {i + 1} failed: {ex.Message}");
+                    Thread.Sleep(500);
+                }
+            }
+            // Son çare olarak JS click uygula
+            var fallbackElement = driver.FindElement(by);
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].click();", fallbackElement);
+            TestContext.WriteLine("[INFO] Clicked with JS as fallback after retries: " + lastEx?.Message);
+        }
+
+
+        /// <summary>
+        /// Accepts the Zara cookie consent popup if it is displayed.
+        /// Uses XPath to locate and click the "Accept All Cookies" button.
+        /// </summary>
+        public void AcceptCookiesIfPresent()
+        {
+            try
+            {
+                var cookieButton = driver.FindElement(By.XPath("//button[contains(text(), 'TÜM ÇEREZLERİ KABUL ET')]"));
+                if (cookieButton.Displayed)
+                {
+                    cookieButton.Click();
+                    TestContext.WriteLine("[INFO] Cookie banner closed.");
+                }
+            }
+            catch (NoSuchElementException)
+            {
+                TestContext.WriteLine("[INFO] Cookie banner not found.");
+            }
+            catch (Exception ex)
+            {
+                TestContext.WriteLine($"[WARN] Failed to close cookie banner: {ex.Message}");
+            }
         }
     }
 }

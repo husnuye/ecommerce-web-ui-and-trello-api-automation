@@ -21,5 +21,9 @@ namespace WebTests.Config
         public static string OutputPath => configuration["OutputPath"];
         public static string LogPath => configuration["LogPath"];
         public static string Browser => configuration["Browser"];
+        public static string Email => configuration["Email"];
+        public static string Password => configuration["Password"];
+        
+         
     }
 }

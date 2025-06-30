@@ -87,7 +87,29 @@ Cards deleted.
 Board deleted.
 ```
 
+## 🔐 API Configuration
+
+To protect your sensitive Trello credentials:
+
+- Do **NOT** commit the real `api.settings.json` file.
+- Instead, use `api.settings.sample.json` to share the structure.
+
+**To run the tests:**
+
+1. Copy the sample file:
+   ```bash
+   cp ApiTests/Config/api.settings.sample.json ApiTests/Config/api.settings.json
+
 ---
+
+
+**EN:**
+📌 To run the tests, copy `api.settings.sample.json` → `api.settings.json` and fill in your own Trello credentials.
+
+
+**EN:**
+📌 Testleri çalıştırmak için `api.settings.sample.json` dosyasını `api.settings.json` olarak kopyalayın ve kendi Trello bilgilerinizi girin.
+
 
 ## 🛡️ Notes / Notlar
 
@@ -107,12 +129,6 @@ Pull request'ler açıktır. Ek işlemler, model ya da test senaryoları eklemek
 
 ---
 
-**EN:**
-📌 To run the tests, copy `api.settings.sample.json` → `api.settings.json` and fill in your own Trello credentials.
-
-
-**EN:**
-📌 Testleri çalıştırmak için `api.settings.sample.json` dosyasını `api.settings.json` olarak kopyalayın ve kendi Trello bilgilerinizi girin.
 
 ## 🌍 License / Lisans
 
