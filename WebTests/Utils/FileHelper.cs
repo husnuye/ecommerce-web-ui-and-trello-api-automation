@@ -1,12 +1,9 @@
-using System.IO;
-
-namespace WebTests.Utils
+// FileHelper.cs
+public static class FileHelper
 {
-    public static class FileHelper
+    public static void SaveText(string outputPath, string content)
     {
-        public static void SaveText(string filePath, string content)
-        {
-            File.WriteAllText(filePath, content);
-        }
+        File.WriteAllText(outputPath, content);
+        TestContext.WriteLine($"[INFO] Text saved to: {outputPath}");
     }
 }
