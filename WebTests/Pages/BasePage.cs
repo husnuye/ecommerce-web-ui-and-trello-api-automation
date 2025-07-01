@@ -212,5 +212,27 @@ namespace WebTests.Pages
                 TestContext.WriteLine($"[WARN] Failed to close cookie banner: {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Scrolls the page to bring the specified element into view.
+        /// </summary>
+        /// <param name="element">The web element to scroll to.</param>
+        protected void ScrollToElement(IWebElement element)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            js.ExecuteScript("arguments[0].scrollIntoView(true);", element);
+        }
+
+
+        /// <summary>
+        /// Waits for and finds all elements matching the given selector.
+        /// </summary>
+        /// <param name="by">The selector to find elements.</param>
+        /// <returns>List of IWebElement</returns>
+        protected IList<IWebElement> WaitAndFindAll(By by)
+        {
+            // You may want to use WebDriverWait for better reliability
+            return driver.FindElements(by);
+        }
     }
 }
