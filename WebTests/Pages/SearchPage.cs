@@ -13,9 +13,11 @@ namespace WebTests.Pages
         private readonly By SearchInput = By.Id("search-home-form-combo-input");
 
         // Use CSS selectors for product-related actions
-        private readonly By ProductList = By.CssSelector("ul.product-grid_product-list > li");
+        private readonly By ProductList = By.CssSelector("ul.carousel__items > li.products-category-grid-media-carousel-item");
 
-        
+
+
+
         public SearchPage(IWebDriver driver) : base(driver) { }
 
         /// <summary>
@@ -38,28 +40,32 @@ namespace WebTests.Pages
         {
             var input = WaitAndFind(SearchInput);
 
-            // Clear the input value directly using JavaScript
-            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].value = '';", input);
+            input.Click();
 
-            // Trigger the 'input' event to notify any JS listeners on the page
-            ((IJavaScriptExecutor)driver).ExecuteScript(
-                "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", input);
+            // İlk olarak Clear ile temizle
+            input.Clear();
 
-            // Brief pause to allow the UI to update
-            Thread.Sleep(2000);
+            // Ardından Backspace ile kalan varsa temizle
+            string currentValue = input.GetAttribute("value");
+            while (!string.IsNullOrEmpty(currentValue))
+            {
+                input.SendKeys(Keys.Backspace);
+                Thread.Sleep(100);  // sayfanın tepki vermesi için kısa bekleme
+                currentValue = input.GetAttribute("value");
+            }
 
-            TestContext.WriteLine("[INFO] Search input cleared via JavaScript.");
+            TestContext.WriteLine("[INFO] Search input cleared by Clear() and Backspace keys until empty.");
         }
-
         /// <summary>
         /// Submits the search input by pressing the Enter key.
         /// </summary>
         public void PressEnterOnSearch()
         {
+
             var input = WaitAndFind(SearchInput);
             input.SendKeys(Keys.Enter);
             TestContext.WriteLine("[INFO] Enter key pressed in search input (search submitted).");
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
             wait.Until(driver => driver.Url.Contains("section=MAN"));
 
             // Assertion ile kontrol et
@@ -72,7 +78,12 @@ namespace WebTests.Pages
         /// <summary>
         /// Selects the first product from the search result list.
         /// </summary>
-        public void SelectFirstProduct()
+      public void SelectFirstProduct()
+{
+    int attempts = 0;
+    while (attempts < 3)
+    {
+        try
         {
             WaitUntilVisible(ProductList);
             var products = WaitAndFindAll(ProductList);
@@ -85,8 +96,21 @@ namespace WebTests.Pages
             firstProduct.Click();
 
             TestContext.WriteLine("[INFO] First product in search results clicked.");
-
-        
+            TestContext.WriteLine("[INFO] First product clicked successfully.");
+            break; // başarılıysa döngüyü kır
+        }
+        catch (StaleElementReferenceException ex)
+        {
+            attempts++;
+            TestContext.WriteLine($"[WARN] Attempt {attempts}: StaleElementReferenceException caught in SelectFirstProduct. Retrying...");
+            if (attempts == 3)
+            {
+                TestContext.WriteLine("[ERROR] Failed to select first product after 3 attempts due to stale element.");
+                throw;  // 3 denemede de başarısızsa hatayı fırlat
+            }
+            Thread.Sleep(1000); // kısa bekleme yapıp tekrar dene
+        }
     }
 }
- }
+    }
+}

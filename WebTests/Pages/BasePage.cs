@@ -234,5 +234,48 @@ namespace WebTests.Pages
             // You may want to use WebDriverWait for better reliability
             return driver.FindElements(by);
         }
+
+
+        /// <summary>
+        /// Scroll to element and click safely using Actions class.
+        /// </summary>
+        /// <param name="by">Element locator</param>
+        public void SafeClickWithScroll(By by)
+        {
+            var element = WaitUntilVisible(by, 10);
+            jsExecutor.ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", element);
+
+            Actions actions = new Actions(driver);
+            actions.MoveToElement(element).Click().Perform();
+
+            TestContext.WriteLine($"[INFO] Safe clicked element: {by.ToString()}");
+        }
+
+
+
+        /// <summary>
+/// Helper method that waits for an element to be visible within a timeout period.
+/// </summary>
+/// <param name="selector">Element selector</param>
+/// <param name="timeout">Maximum wait time</param>
+/// <returns>True if element became visible, false if timeout occurred</returns>
+private bool WaitUntilVisibleOrTimeout(By selector, TimeSpan timeout)
+{
+    try
+    {
+        var wait = new WebDriverWait(driver, timeout);
+        wait.Until(drv =>
+        {
+            var element = drv.FindElement(selector);
+            return (element != null && element.Displayed) ? element : null;
+        });
+        return true;
+    }
+    catch (WebDriverTimeoutException)
+    {
+        TestContext.WriteLine($"[WARN] Timeout waiting for element: {selector}");
+        return false;
+    }
+}
     }
 }

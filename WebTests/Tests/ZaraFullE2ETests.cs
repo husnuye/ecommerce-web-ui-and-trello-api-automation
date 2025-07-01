@@ -5,6 +5,8 @@ using WebTests.Utils;
 using WebTests.Config;
 using System.IO;
 using log4net;
+using OpenQA.Selenium.Support.UI;
+using OpenQA.Selenium;
 
 namespace WebTests.Tests
 {
@@ -65,11 +67,9 @@ namespace WebTests.Tests
                 homePage.ClickSeeAllIfPresent();
                 Logger.Info("'TÜMÜNÜ GÖR' link clicked if it was available.");
 
-                /*
-                              // TEST Block
-                              driver.Navigate().GoToUrl(ConfigurationReader.BaseUrl + "/tr/tr/s-erkek-indirim-l10847.html?v1=2439352");
-                              Logger.Info("Navigated directly to men's discount page.");
-                              */
+
+
+
 
                 // Step 4:  The word “şort” from the 1st row, 1st column of the Excel file is typed into the search box.
 
@@ -150,20 +150,42 @@ namespace WebTests.Tests
                 searchPage.PressEnterOnSearch();
                 Logger.Info($"Searched for keyword: '{keyword2}' and submitted the search.");
 
-                /*
-                                // Step 11: Assert that search results are displayed
-                                Assert.That(searchPage.IsSearchResultDisplayed(), Is.True, "Search results are not displayed on the page!");
-                                Logger.Info("Search result grid is visible and search succeeded."); */
+
+                /* Step 11: Assert that search results are displayed
+                Assert.That(searchPage.IsSearchResultDisplayed(), Is.True, "Search results are not displayed on the page!");
+                Logger.Info("Search result grid is visible and search succeeded."); */
 
 
 
                 // Step 8: The first product from the listed search results is selected.
 
+                // Ardından arama sayfasına yönlendirme
+
+
                 searchPage.SelectFirstProduct();
                 Logger.Info("First product selected from search results.");
 
+
+
+
+
+                /* // TEST Block
+               driver.Navigate().GoToUrl("https://www.zara.com/tr/tr/dokulu-orgu-t-shirt-p03003401.html?v1=415381591");
+               Logger.Info("Navigated directly to product detail page.");
+               Logger.Info("Login successful.");
+
+// Sayfa tam yüklenene kadar bekle
+var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+wait.Until(drv => ((IJavaScriptExecutor)drv).ExecuteScript("return document.readyState").Equals("complete"));
+
+// Daha sonra elementleri işle */
+
                 // Create ProductPage instance after navigating to product detail
                 var productPage = new ProductPage(driver);
+
+
+
+
 
                 // Step 9: The product name and price information are written to a .txt file.
 
@@ -180,10 +202,45 @@ namespace WebTests.Tests
 
                 // Step 10: The product is added to the cart.
 
-                // Add product to cart
-                productPage.AddProductToCart();
-                Logger.Info("Step 13: Product added to cart.");
+                // Step 10: The product is added to the cart with detailed steps.
 
+                // Step 10.1: Click 'Ekle' (Add) button
+                bool clickedAdd = productPage.ClickAddButton();
+                if (!clickedAdd)
+                {
+                    Logger.Warn("[WARN] 'Ekle' button not found, skipping add to cart.");
+                    Assert.Fail("'Ekle' button not found, cannot proceed.");
+                }
+                Logger.Info("[STEP 10.1] 'Ekle' button clicked.");
+
+                // Step 10.2: Open size selector button
+                bool openedSizeSelector = productPage.OpenSizeSelector();
+                if (!openedSizeSelector)
+                {
+                    Logger.Warn("[WARN] Size selector button not found.");
+                    Assert.Fail("Size selector button not found, cannot proceed.");
+                }
+                Logger.Info("[STEP 10.2] Size selector button clicked.");
+
+                // Step 10.3: Handle Smart Size popup if present
+                productPage.HandleSmartSizePopup();
+                Logger.Info("[STEP 10.3] Smart Size popup handled if present.");
+
+                // Step 10.4: Select first available size
+                bool sizeSelected = productPage.SelectFirstAvailableSize();
+                if (!sizeSelected)
+                {
+                    Logger.Warn("[WARN] No active size button found, skipping size selection.");
+                    Assert.Fail("No active size found, cannot proceed.");
+                }
+                Logger.Info("[STEP 10.4] First available size selected.");
+
+                // Step 10.5: Click 'Complete Order' button after waiting for it
+                productPage.ClickCompleteOrderButtonWithWait();
+                Logger.Info("[STEP 10.5] 'Complete Order' button clicked.");
+
+                // Step 10 completed successfully
+                Logger.Info("Step 10: Product added to cart successfully.");
 
                 // Step 11: The product price on the product page is compared with the cart price.
 
@@ -196,7 +253,7 @@ namespace WebTests.Tests
                 Assert.That(cartPrice, Is.EqualTo(productPrice), "Cart price does not match product price");
                 Logger.Info($"[CHECK] Cart price matches product page. Product: {productPrice}, Cart: {cartPrice}");
 
-                // senaryo 12 : The product quantity in the cart is changed to 2 and verified.
+                // Step 12 : The product quantity in the cart is changed to 2 and verified.
 
                 // Change quantity to 2, verify
                 cartPage.ChangeQuantity("2");
