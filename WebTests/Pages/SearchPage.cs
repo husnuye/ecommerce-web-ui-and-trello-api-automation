@@ -15,10 +15,7 @@ namespace WebTests.Pages
         // Use CSS selectors for product-related actions
         private readonly By ProductList = By.CssSelector("ul.product-grid_product-list > li");
 
-        private readonly By ProductName = By.CssSelector(".product-detail-name");
-        private readonly By ProductPrice = By.CssSelector(".product-detail-price");
-        private readonly By AddToCartButton = By.CssSelector("button.add-to-cart");
-
+        
         public SearchPage(IWebDriver driver) : base(driver) { }
 
         /// <summary>
@@ -72,81 +69,24 @@ namespace WebTests.Pages
 
 
 
-        // <summary>
-        /// Selects a random product from the product list.
+        /// <summary>
+        /// Selects the first product from the search result list.
         /// </summary>
-        public void SelectRandomProduct()
+        public void SelectFirstProduct()
         {
-            // Wait until the product list is visible
             WaitUntilVisible(ProductList);
-
-            // Find the container of product list again to avoid stale elements
             var products = WaitAndFindAll(ProductList);
 
             if (products.Count == 0)
-                throw new Exception("No products found on search results.");
+                throw new Exception("No products found in search results.");
 
-            // Randomly pick a product index
-            var rnd = new Random();
-            var chosenIndex = rnd.Next(products.Count);
+            var firstProduct = products.First();
+            ScrollToElement(firstProduct);
+            firstProduct.Click();
 
-            // Re-fetch the product before clicking to avoid stale references
-            var refreshedProducts = WaitAndFindAll(ProductList);
-            var chosenProduct = refreshedProducts[chosenIndex];
+            TestContext.WriteLine("[INFO] First product in search results clicked.");
 
-            ScrollToElement(chosenProduct);  // Optional: to ensure visibility
-            chosenProduct.Click();
-
-            TestContext.WriteLine($"[INFO] Random product clicked. Index: {chosenIndex}");
-        }
-
-        /// <summary>
-        /// Scrolls the page to bring the specified element into view.
-        /// </summary>
-        /// <param name="element">The web element to scroll to.</param>
-        private void ScrollToElement(IWebElement element)
-        {
-            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-            js.ExecuteScript("arguments[0].scrollIntoView(true);", element);
-        }
-
-
-        /// <summary>
-        /// Waits for and finds all elements matching the given selector.
-        /// </summary>
-        /// <param name="by">The selector to find elements.</param>
-        /// <returns>List of IWebElement</returns>
-        private IList<IWebElement> WaitAndFindAll(By by)
-        {
-            // You may want to use WebDriverWait for better reliability
-            return driver.FindElements(by);
-        }
-
-        /// <summary>
-        /// Retrieves the selected product's name.
-        /// </summary>
-        /// <returns>Product name as string</returns>
-        public string GetProductName()
-        {
-            return WaitAndFind(ProductName).Text;
-        }
-
-        /// <summary>
-        /// Retrieves the selected product's price.
-        /// </summary>
-        /// <returns>Product price as string</returns>
-        public string GetProductPrice()
-        {
-            return WaitAndFind(ProductPrice).Text;
-        }
-
-        /// <summary>
-        /// Clicks the "Add to Cart" button for the selected product.
-        /// </summary>
-        public void AddProductToCart()
-        {
-            SafeClick(AddToCartButton);
-            TestContext.WriteLine("[INFO] Add to cart button clicked.");
-        }
+        
     }
 }
+ }

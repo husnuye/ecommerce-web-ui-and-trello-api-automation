@@ -10,41 +10,43 @@ namespace WebTests.Pages
     public class ProductPage : BasePage
     {
         private readonly By ProductLinks = By.CssSelector("a.product-link");
-        private readonly By ProductName = By.CssSelector("h1.product-name");
-        private readonly By ProductPrice = By.CssSelector(".price__amount");
-        private readonly By AddToCart = By.CssSelector("button[data-testid='add-to-cart']");
+
+        private readonly By ProductName = By.CssSelector(".product-detail-name");
+        private readonly By ProductPrice = By.CssSelector(".product-detail-price");
+        private readonly By AddToCartButton = By.CssSelector("button.add-to-cart");
+
 
         private readonly Random random = new Random();
 
         public ProductPage(IWebDriver driver) : base(driver) { }
 
-        /// <summary>
-        /// Selects a random product from search results.
-        /// </summary>
-        public void SelectRandomProduct()
-        {
-            var products = driver.FindElements(ProductLinks).ToList();
-            if (products.Count == 0)
-                throw new Exception("No products found");
 
-            var selected = products[random.Next(products.Count)];
-            ScrollTo(ProductLinks);
-            selected.Click();
+
+        /// <summary>
+        /// Retrieves the selected product's name.
+        /// </summary>
+        /// <returns>Product name as string</returns>
+        public string GetProductName()
+        {
+            return WaitAndFind(ProductName).Text;
         }
 
         /// <summary>
-        /// Gets product name from detail page.
+        /// Retrieves the selected product's price.
         /// </summary>
-        public string GetProductName() => WaitAndFind(ProductName).Text.Trim();
+        /// <returns>Product price as string</returns>
+        public string GetProductPrice()
+        {
+            return WaitAndFind(ProductPrice).Text;
+        }
 
         /// <summary>
-        /// Gets product price from detail page.
+        /// Clicks the "Add to Cart" button for the selected product.
         /// </summary>
-        public string GetProductPrice() => WaitAndFind(ProductPrice).Text.Trim();
-
-        /// <summary>
-        /// Adds product to cart.
-        /// </summary>
-        public void AddProductToCart() => Click(AddToCart);
+        public void AddProductToCart()
+        {
+            SafeClick(AddToCartButton);
+            TestContext.WriteLine("[INFO] Add to cart button clicked.");
+        }
     }
 }
