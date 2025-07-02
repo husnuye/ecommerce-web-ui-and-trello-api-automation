@@ -204,39 +204,17 @@ wait.Until(drv => ((IJavaScriptExecutor)drv).ExecuteScript("return document.read
 
                 // Step 10: The product is added to the cart with detailed steps.
 
-                // Step 10.1: Click 'Ekle' (Add) button
-                bool clickedAdd = productPage.ClickAddButton();
-                if (!clickedAdd)
-                {
-                    Logger.Warn("[WARN] 'Ekle' button not found, skipping add to cart.");
-                    Assert.Fail("'Ekle' button not found, cannot proceed.");
-                }
+                productPage.AddProductToCartWithSize();
+
+
                 Logger.Info("[STEP 10.1] 'Ekle' button clicked.");
 
-                // Step 10.2: Open size selector button
-                bool openedSizeSelector = productPage.OpenSizeSelector();
-                if (!openedSizeSelector)
-                {
-                    Logger.Warn("[WARN] Size selector button not found.");
-                    Assert.Fail("Size selector button not found, cannot proceed.");
-                }
                 Logger.Info("[STEP 10.2] Size selector button clicked.");
 
-                // Step 10.3: Handle Smart Size popup if present
-                productPage.HandleSmartSizePopup();
                 Logger.Info("[STEP 10.3] Smart Size popup handled if present.");
 
-                // Step 10.4: Select first available size
-                bool sizeSelected = productPage.SelectFirstAvailableSize();
-                if (!sizeSelected)
-                {
-                    Logger.Warn("[WARN] No active size button found, skipping size selection.");
-                    Assert.Fail("No active size found, cannot proceed.");
-                }
                 Logger.Info("[STEP 10.4] First available size selected.");
 
-                // Step 10.5: Click 'Complete Order' button after waiting for it
-                productPage.ClickCompleteOrderButtonWithWait();
                 Logger.Info("[STEP 10.5] 'Complete Order' button clicked.");
 
                 // Step 10 completed successfully
@@ -249,8 +227,14 @@ wait.Until(drv => ((IJavaScriptExecutor)drv).ExecuteScript("return document.read
                 var cartPage = new CartPage(driver);
                 cartPage.OpenCart();
 
+                // Get cart price from cart page
                 string cartPrice = cartPage.GetCartPrice();
-                Assert.That(cartPrice, Is.EqualTo(productPrice), "Cart price does not match product price");
+
+
+                decimal productPagePriceDecimal = cartPage.ParsePriceStringToDecimal(productPrice);
+                decimal cartPriceDecimal = cartPage.ParsePriceStringToDecimal(cartPrice);
+                Assert.That(cartPriceDecimal, Is.EqualTo(productPagePriceDecimal), "Product price and cart price should be equal");
+
                 Logger.Info($"[CHECK] Cart price matches product page. Product: {productPrice}, Cart: {cartPrice}");
 
                 // Step 12 : The product quantity in the cart is changed to 2 and verified.
