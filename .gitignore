@@ -1,2 +1,3 @@
 WebTests/bin/
 WebTests/obj/
+/ApiTests/Config/api.settings.json

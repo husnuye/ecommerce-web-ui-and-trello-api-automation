@@ -100,14 +100,22 @@ public bool ClickAddButton()
 /// </summary>
 public void HandleSmartSizePopup()
 {
-    if (WaitUntilVisibleOrTimeout(SmartSizeNoThanksButton, TimeSpan.FromSeconds(10)))
+    try
     {
-        TestContext.WriteLine("[INFO] Smart Size popup detected, clicking 'No Thanks' button.");
-        SafeClickWithScroll(SmartSizeNoThanksButton);
+        if (WaitUntilVisibleOrTimeout(SmartSizeNoThanksButton, TimeSpan.FromSeconds(10)))
+        {
+            TestContext.WriteLine("[INFO] Smart Size popup detected, clicking 'No Thanks' button.");
+            SafeClickWithScroll(SmartSizeNoThanksButton);
+        }
+        else
+        {
+            TestContext.WriteLine("[INFO] Smart Size popup not present.");
+        }
     }
-    else
+    catch (Exception ex)
     {
-        TestContext.WriteLine("[INFO] Smart Size popup not present.");
+        TestContext.WriteLine($"[WARN] Exception while handling Smart Size popup: {ex.Message}");
+        // Continue execution even if popup is not present or an error occurs
     }
 }
 
