@@ -133,6 +133,11 @@ namespace WebTests.Pages
         /// Adds a product to the cart by clicking 'Add' button, selecting first available size,
         /// and clicking 'Complete Order' button if present.
         /// </summary>
+<<<<<<< HEAD
+
+
+=======
+>>>>>>> main
         public void AddProductToCartWithSize()
         {
             TestContext.WriteLine("[INFO] Starting process to add product to cart.");
@@ -179,6 +184,25 @@ namespace WebTests.Pages
                             return;
                         }
                     }
+<<<<<<< HEAD
+
+                    // 🔽 Ek: Popup'ı kapat
+                    try
+                    {
+                        var popupSelector = By.CssSelector("div.add-to-cart-notification-content");
+                        if (IsElementPresent(popupSelector))
+                        {
+                            TestContext.WriteLine("[INFO] Popup bulundu, kaldırılıyor...");
+                            jsExecutor.ExecuteScript("var el = document.querySelector('div.add-to-cart-notification-content'); if(el) el.remove();");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        TestContext.WriteLine($"[WARN] Popup removal failed: {ex.Message}");
+                    }
+                    // 🔼 Ek Bitiş
+=======
+>>>>>>> main
                 }
                 else
                 {
@@ -206,6 +230,17 @@ namespace WebTests.Pages
                 return;
             }
         }
+<<<<<<< HEAD
+
+
+
+
+
+
+
+
+=======
+>>>>>>> main
         /// <summary>
         /// Helper method that waits for an element to be visible within a timeout period.
         /// </summary>
