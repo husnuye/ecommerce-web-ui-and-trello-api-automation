@@ -134,7 +134,7 @@ namespace WebTests.Pages
         /// and clicking 'Complete Order' button if present.
         /// </summary>
 
-public void AddProductToCartWithSize()
+        public void AddProductToCartWithSize()
         {
             TestContext.WriteLine("[INFO] Starting process to add product to cart.");
 
@@ -197,6 +197,7 @@ public void AddProductToCartWithSize()
                     }
                     // 🔼 Ek Bitiş
 
+
                 }
                 else
                 {
@@ -224,6 +225,7 @@ public void AddProductToCartWithSize()
                 return;
             }
         }
+
 
 
 
