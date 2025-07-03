@@ -19,7 +19,7 @@ namespace WebTests.Pages
         private readonly By IncreaseButton = By.CssSelector("div.zds-quantity-selector__increase[data-ga-id='add-order-item-unit']");
         private readonly By QuantityInput = By.CssSelector("input.zds-quantity-selector__units-input");
         private readonly By CartPopup = By.CssSelector("div.add-to-cart-notification-content");
-        
+
 
 
         public CartPage(IWebDriver driver) : base(driver) { }
@@ -70,46 +70,46 @@ namespace WebTests.Pages
             return decimal.Parse(cleaned, CultureInfo.InvariantCulture);
         }
 
-//
-/// <summary>
-/// Increases the quantity of a product in the cart by clicking the '+' button required number of times.
-/// Scrolls to the button, hovers over it, waits for overlay to disappear, and uses JS fallback if needed.
-/// </summary>
-public void ChangeQuantity(string quantity)
-{
-    var plusButton = By.CssSelector("div.zds-quantity-selector__increase[data-ga-id='add-order-item-unit']");
-
-    try
-    {
-        WaitUntilPageLoad(); // Sayfa yüklensin
-        WaitUntilInvisible(CartPopup, 10); // Sepete eklendi popup kalksın
-        WaitUntilVisible(plusButton, 10);  // Artı buton görünene kadar bekle
-
-        int timesToClick = int.Parse(quantity) - 1;
-        if (timesToClick <= 0)
+        //
+        /// <summary>
+        /// Increases the quantity of a product in the cart by clicking the '+' button required number of times.
+        /// Scrolls to the button, hovers over it, waits for overlay to disappear, and uses JS fallback if needed.
+        /// </summary>
+        public void ChangeQuantity(string quantity)
         {
-            TestContext.WriteLine($"[INFO] No quantity change needed. Desired quantity: {quantity}");
-            return;
-        }
+            var plusButton = By.CssSelector("div.zds-quantity-selector__increase[data-ga-id='add-order-item-unit']");
 
-        for (int i = 0; i < timesToClick; i++)
-        {
-            var plusButtonElement = WaitAndFind(plusButton);
-            ForceClickWithScrollAndHover(plusButtonElement); // Scroll + hover + click
-            Thread.Sleep(300);
-        }
+            try
+            {
+                WaitUntilPageLoad(); // Sayfa yüklensin
+                WaitUntilInvisible(CartPopup, 10); // Sepete eklendi popup kalksın
+                WaitUntilVisible(plusButton, 10);  // Artı buton görünene kadar bekle
 
-        TestContext.WriteLine($"[INFO] Quantity successfully increased to {quantity}");
-    }
-    catch (NoSuchElementException)
-    {
-        TestContext.WriteLine($"[ERROR] '+' button not found — selector may be invalid or button not rendered.");
-    }
-    catch (Exception ex)
-    {
-        TestContext.WriteLine($"[ERROR] Failed to change quantity to {quantity}: {ex.Message}");
-    }
-}
+                int timesToClick = int.Parse(quantity) - 1;
+                if (timesToClick <= 0)
+                {
+                    TestContext.WriteLine($"[INFO] No quantity change needed. Desired quantity: {quantity}");
+                    return;
+                }
+
+                for (int i = 0; i < timesToClick; i++)
+                {
+                    var plusButtonElement = WaitAndFind(plusButton);
+                    ForceClickWithScrollAndHover(plusButtonElement); // Scroll + hover + click
+                    Thread.Sleep(300);
+                }
+
+                TestContext.WriteLine($"[INFO] Quantity successfully increased to {quantity}");
+            }
+            catch (NoSuchElementException)
+            {
+                TestContext.WriteLine($"[ERROR] '+' button not found — selector may be invalid or button not rendered.");
+            }
+            catch (Exception ex)
+            {
+                TestContext.WriteLine($"[ERROR] Failed to change quantity to {quantity}: {ex.Message}");
+            }
+        }
 
         /// <summary>
         /// Waits until the page is fully loaded (document.readyState === 'complete').

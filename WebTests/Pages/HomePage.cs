@@ -114,40 +114,40 @@ namespace WebTests.Pages
                 TestContext.WriteLine("'TÜMÜNÜ GÖR' not found – continuing...");
             }
         }
-public void OpenSearchBox()
-{
-    // Use a robust XPath selector for the search icon (looks for the 'Ara' text).
-    var searchIconBy = By.XPath("//span[text()='Ara']");
-
-    TestContext.WriteLine("[DEBUG] Attempting to open search box via XPath...");
-
-    try
-    {
-        // Wait until the element with 'Ara' text is visible in the DOM.
-        WaitUntilVisible(searchIconBy);
-
-        // Try to click the element safely.
-        SafeClick(searchIconBy);
-
-        TestContext.WriteLine("[INFO] Search box successfully clicked using XPath and SafeClick.");
-    }
-    catch (Exception ex)
-    {
-        TestContext.WriteLine("[ERROR] Failed to click search box with XPath: " + ex.Message);
-
-        // Optional: Take a screenshot for troubleshooting.
-        try
+        public void OpenSearchBox()
         {
-            var screenshot = ((ITakesScreenshot)driver).GetScreenshot();
-            var path = $"SearchBoxClickError_{DateTime.Now:yyyyMMdd_HHmmss}.png";
-            screenshot.SaveAsFile(path);
-            TestContext.WriteLine("[INFO] Screenshot saved to: " + path);
-        }
-        catch { /* ignore screenshot errors */ }
+            // Use a robust XPath selector for the search icon (looks for the 'Ara' text).
+            var searchIconBy = By.XPath("//span[text()='Ara']");
 
-        throw;
-    }
-}
+            TestContext.WriteLine("[DEBUG] Attempting to open search box via XPath...");
+
+            try
+            {
+                // Wait until the element with 'Ara' text is visible in the DOM.
+                WaitUntilVisible(searchIconBy);
+
+                // Try to click the element safely.
+                SafeClick(searchIconBy);
+
+                TestContext.WriteLine("[INFO] Search box successfully clicked using XPath and SafeClick.");
+            }
+            catch (Exception ex)
+            {
+                TestContext.WriteLine("[ERROR] Failed to click search box with XPath: " + ex.Message);
+
+                // Optional: Take a screenshot for troubleshooting.
+                try
+                {
+                    var screenshot = ((ITakesScreenshot)driver).GetScreenshot();
+                    var path = $"SearchBoxClickError_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+                    screenshot.SaveAsFile(path);
+                    TestContext.WriteLine("[INFO] Screenshot saved to: " + path);
+                }
+                catch { /* ignore screenshot errors */ }
+
+                throw;
+            }
+        }
 
 
     }
