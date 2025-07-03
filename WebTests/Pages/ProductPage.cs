@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using NUnit.Framework; // For TestContext
 using SeleniumExtras.WaitHelpers;
+using System.Globalization;
 
 namespace WebTests.Pages
 {
@@ -72,13 +73,37 @@ namespace WebTests.Pages
         public string GetProductPrice()
         {
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-            var element = wait.Until(drv =>
+            wait.Until(drv => drv.FindElements(ProductPrice).Count > 0);
+
+            var elements = driver.FindElements(ProductPrice)
+                                 .Where(e => e.Displayed && !string.IsNullOrWhiteSpace(e.Text))
+                                 .ToList();
+
+            if (!elements.Any())
+                throw new Exception("No price elements were found or visible on the page.");
+
+            // Log all raw text contents to help debug multiline issues
+            foreach (var e in elements)
             {
-                var el = drv.FindElement(ProductPrice);
-                return (el != null && el.Displayed) ? el : null;
-            });
-            jsExecutor.ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", element);
-            string priceText = element.Text;
+                var raw = e.Text.Replace("\n", "\\n").Replace("\r", "\\r");
+                TestContext.WriteLine($"[PRICE-RAW] Element text: {raw}");
+            }
+
+            // Flatten all text lines from all elements
+            var priceLines = elements
+                .SelectMany(e => e.Text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                .Select(line => line.Trim())
+                .Where(line => (line.Contains("TL") || line.Contains("₺")) && !line.Contains("%"))
+                .ToList();
+
+            if (!priceLines.Any())
+                throw new Exception("No valid product price found!");
+
+            string priceText = priceLines.Last();
+
+            // Scroll to last element for visibility (optional)
+            jsExecutor.ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", elements.Last());
+
             TestContext.WriteLine($"[INFO] Product price found: {priceText}");
             return priceText;
         }
@@ -92,19 +117,18 @@ namespace WebTests.Pages
         /// <exception cref="FormatException">Thrown if the price string cannot be parsed into a decimal.</exception>
         public decimal ParsePriceStringToDecimal(string priceText)
         {
-            string cleaned = priceText.Replace("TL", "").Trim();
-            cleaned = cleaned.Replace(".", "");
-            cleaned = cleaned.Replace(",", ".");
-            if (decimal.TryParse(cleaned, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal result))
-            {
-                return result;
-            }
-            else
-            {
-                throw new FormatException($"Could not parse price text: {priceText}");
-            }
-        }
+            var clean = priceText
+                .Replace(".", "")       // 1.690 -> 1690
+                .Replace(",", ".")      // 1690,00 -> 1690.00
+                .Replace("TL", "")      // 1690.00 TL -> 1690.00
+                .Replace("₺", "")       // destek olsun
+                .Trim();
 
+            if (!decimal.TryParse(clean, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
+                throw new FormatException($"Could not parse price text: {priceText}");
+
+            return result;
+        }
         /// <summary>
         /// Adds a product to the cart by clicking 'Add' button, selecting first available size,
         /// and clicking 'Complete Order' button if present.
