@@ -134,7 +134,6 @@ namespace WebTests.Pages
         /// and clicking 'Complete Order' button if present.
         /// </summary>
 
-
         public void AddProductToCartWithSize()
         {
             TestContext.WriteLine("[INFO] Starting process to add product to cart.");
@@ -197,6 +196,7 @@ namespace WebTests.Pages
                         TestContext.WriteLine($"[WARN] Popup removal failed: {ex.Message}");
                     }
                     // 🔼 Ek Bitiş
+
                 }
                 else
                 {
@@ -224,7 +224,6 @@ namespace WebTests.Pages
                 return;
             }
         }
-
 
         /// <summary>
         /// Helper method that waits for an element to be visible within a timeout period.
