@@ -55,3 +55,11 @@ nunit-*.xml
 
 # Local secrets
 Config/api.settings.jsonApiTests/Config/api.settings.json
+
+
+bin/
+obj/
+*.dll
+*.pdb
+*.cache
+*.tmp
