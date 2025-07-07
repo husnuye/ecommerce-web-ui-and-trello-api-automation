@@ -134,6 +134,7 @@ namespace WebTests.Pages
         /// and clicking 'Complete Order' button if present.
         /// </summary>
 
+
         public void AddProductToCartWithSize()
         {
             TestContext.WriteLine("[INFO] Starting process to add product to cart.");
@@ -141,7 +142,7 @@ namespace WebTests.Pages
             // Step 1: Click 'Add' button if visible
             if (IsVisible(AddButtonSelector))
             {
-                TestContext.WriteLine("[INFO] 'Ekle' button found, clicking it.");
+                TestContext.WriteLine("[INFO] 'Add' button found, clicking it.");
                 SafeClick(AddButtonSelector);
 
                 // Step 2: Wait for size options to appear
@@ -180,32 +181,19 @@ namespace WebTests.Pages
                             return;
                         }
                     }
-
-                    // 🔽 Ek: Popup'ı kapat
-                    try
-                    {
-                        var popupSelector = By.CssSelector("div.add-to-cart-notification-content");
-                        if (IsElementPresent(popupSelector))
-                        {
-                            TestContext.WriteLine("[INFO] Popup bulundu, kaldırılıyor...");
-                            jsExecutor.ExecuteScript("var el = document.querySelector('div.add-to-cart-notification-content'); if(el) el.remove();");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        TestContext.WriteLine($"[WARN] Popup removal failed: {ex.Message}");
-                    }
-                    // 🔼 Ek Bitiş
-
                 }
                 else
                 {
                     TestContext.WriteLine("[WARN] No active size button found, skipping size selection.");
+                    return;
                 }
 
+                // Step 3.5: Dismiss Smart Size popup if present
+                TryDismissSmartSizePopup(driver);
+
                 // Step 4: Wait a bit before checking for 'Complete Order' button
-                TestContext.WriteLine("[INFO] Waiting 5 seconds before checking 'Complete Order' button.");
-                System.Threading.Thread.Sleep(5000);
+                TestContext.WriteLine("[INFO] Waiting 2 seconds before checking 'Complete Order' button.");
+                Thread.Sleep(2000);
 
                 // Step 5: Click 'Complete Order' button if available
                 if (IsVisible(CompleteOrderButton))
@@ -220,8 +208,44 @@ namespace WebTests.Pages
             }
             else
             {
-                TestContext.WriteLine("[WARN] 'Ekle' button not found, skipping add to cart.");
+                TestContext.WriteLine("[WARN] 'Add' button not found, skipping add to cart.");
                 return;
+            }
+        }
+
+
+        /// <summary>
+        /// Attempts to dismiss the "Smart Size" suggestion popup if it appears.
+        /// </summary>
+        public void TryDismissSmartSizePopup(IWebDriver driver)
+        {
+            try
+            {
+                // Wait up to 5 seconds for the popup "No, thanks" button to appear
+                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+                var cancelBtn = wait.Until(drv =>
+                    drv.FindElements(By.CssSelector("[data-qa-id='zds-alert-dialog-cancel-button']"))
+                       .FirstOrDefault(el => el.Displayed && el.Enabled)
+                );
+
+                if (cancelBtn != null)
+                {
+                    TestContext.WriteLine("[INFO] Smart Size popup detected, clicking 'No, thanks'...");
+                    cancelBtn.Click();
+                    Thread.Sleep(400); // Wait for the popup to close
+                }
+                else
+                {
+                    TestContext.WriteLine("[INFO] Smart Size popup was not present.");
+                }
+            }
+            catch (WebDriverTimeoutException)
+            {
+                TestContext.WriteLine("[INFO] Smart Size popup did not appear.");
+            }
+            catch (Exception ex)
+            {
+                TestContext.WriteLine($"[WARN] Exception while closing Smart Size popup: {ex.Message}");
             }
         }
 

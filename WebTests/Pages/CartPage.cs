@@ -19,7 +19,7 @@ namespace WebTests.Pages
         private readonly By IncreaseButton = By.CssSelector("div.zds-quantity-selector__increase[data-ga-id='add-order-item-unit']");
         private readonly By QuantityInput = By.CssSelector("input.zds-quantity-selector__units-input");
         private readonly By CartPopup = By.CssSelector("div.add-to-cart-notification-content");
-        
+
 
 
         public CartPage(IWebDriver driver) : base(driver) { }
@@ -70,55 +70,123 @@ namespace WebTests.Pages
             return decimal.Parse(cleaned, CultureInfo.InvariantCulture);
         }
 
-//
-/// <summary>
-/// Increases the quantity of a product in the cart by clicking the '+' button required number of times.
-/// Scrolls to the button, hovers over it, waits for overlay to disappear, and uses JS fallback if needed.
-/// </summary>
-public void ChangeQuantity(string quantity)
-{
-    var plusButton = By.CssSelector("div.zds-quantity-selector__increase[data-ga-id='add-order-item-unit']");
-
-    try
-    {
-        WaitUntilPageLoad(); // Sayfa yüklensin
-        WaitUntilInvisible(CartPopup, 10); // Sepete eklendi popup kalksın
-        WaitUntilVisible(plusButton, 10);  // Artı buton görünene kadar bekle
-
-        int timesToClick = int.Parse(quantity) - 1;
-        if (timesToClick <= 0)
+        //
+        /// <summary>
+        /// Increases the quantity of a product in the cart by clicking the '+' button required number of times.
+        /// Scrolls to the button, hovers over it, waits for overlay to disappear, and uses JS fallback if needed.
+        /// </summary>
+        public void ChangeQuantity(string quantity)
         {
-            TestContext.WriteLine($"[INFO] No quantity change needed. Desired quantity: {quantity}");
-            return;
+            var plusButtonSelector = By.CssSelector("div.zds-quantity-selector__increase");
+            int maxTries = 8; // Maximum scroll attempts
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            var actions = new OpenQA.Selenium.Interactions.Actions(driver);
+
+            try
+            {
+                WaitUntilPageLoad();
+                WaitUntilInvisible(CartPopup, 10);
+
+                IWebElement plusButtonElement = null;
+
+                for (int i = 0; i < maxTries; i++)
+                {
+                    try
+                    {
+                        // Find the increase button inside the first cart item
+                        var cartItems = driver.FindElements(By.CssSelector("div.shop-cart-item_info"));
+                        if (cartItems.Count > 0)
+                        {
+                            plusButtonElement = cartItems[0].FindElement(plusButtonSelector);
+                        }
+                        else
+                        {
+                            // If no cart items found, try global search
+                            plusButtonElement = driver.FindElement(plusButtonSelector);
+                        }
+
+                        // Scroll the element into view using JavaScript
+                        ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView({block:'center'});", plusButtonElement);
+
+                        // Wait until the element is visible and enabled (clickable)
+                        wait.Until(d => plusButtonElement.Displayed && plusButtonElement.Enabled);
+
+                        break; // Element found, exit loop
+                    }
+                    catch (NoSuchElementException)
+                    {
+                        // Element not found, scroll down a bit and retry
+                        actions.ScrollByAmount(0, 50).Perform();
+                        Thread.Sleep(200);
+                    }
+                    catch (WebDriverTimeoutException)
+                    {
+                        // Element not visible yet, scroll and retry
+                        actions.ScrollByAmount(0, 50).Perform();
+                        Thread.Sleep(200);
+                    }
+                }
+
+                if (plusButtonElement == null || !plusButtonElement.Displayed)
+                {
+                    TestContext.WriteLine($"[ERROR] '+' button still not visible after scrolling.");
+                    return;
+                }
+
+                // Try to get the current quantity value
+                int currentQty = 1;
+                try
+                {
+                    var qtySpan = plusButtonElement.FindElement(By.XPath("../preceding-sibling::span[contains(@class,'zds-quantity-selector__quantity')]"));
+                    currentQty = int.Parse(qtySpan.Text.Trim());
+                }
+                catch
+                {
+                    // If reading fails, assume default quantity = 1
+                }
+
+                int desiredQty = int.Parse(quantity);
+                int timesToClick = desiredQty - currentQty;
+
+                if (timesToClick <= 0)
+                {
+                    TestContext.WriteLine($"[INFO] No quantity change needed. Current: {currentQty}, Desired: {desiredQty}");
+                    return;
+                }
+
+                for (int i = 0; i < timesToClick; i++)
+                {
+                    try
+                    {
+                        plusButtonElement.Click();
+                    }
+                    catch (Exception)
+                    {
+                        // If normal click fails, fallback to JS click
+                        ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].click();", plusButtonElement);
+                    }
+                    Thread.Sleep(300);
+                }
+
+                TestContext.WriteLine($"[INFO] Quantity successfully increased to {quantity}");
+            }
+            catch (NoSuchElementException)
+            {
+                TestContext.WriteLine("[ERROR] '+' button not found — selector may be invalid or button not rendered.");
+            }
+            catch (Exception ex)
+            {
+                TestContext.WriteLine($"[ERROR] Failed to change quantity to {quantity}: {ex.Message}");
+            }
         }
-
-        for (int i = 0; i < timesToClick; i++)
-        {
-            var plusButtonElement = WaitAndFind(plusButton);
-            ForceClickWithScrollAndHover(plusButtonElement); // Scroll + hover + click
-            Thread.Sleep(300);
-        }
-
-        TestContext.WriteLine($"[INFO] Quantity successfully increased to {quantity}");
-    }
-    catch (NoSuchElementException)
-    {
-        TestContext.WriteLine($"[ERROR] '+' button not found — selector may be invalid or button not rendered.");
-    }
-    catch (Exception ex)
-    {
-        TestContext.WriteLine($"[ERROR] Failed to change quantity to {quantity}: {ex.Message}");
-    }
-}
-
         /// <summary>
         /// Waits until the page is fully loaded (document.readyState === 'complete').
         /// </summary>
         private void WaitUntilPageLoad(int timeoutInSeconds = 15)
         {
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutInSeconds));
-            wait.Until(drv =>
-                ((IJavaScriptExecutor)drv).ExecuteScript("return document.readyState").ToString() == "complete"
+            wait.Until(d =>
+                ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").ToString() == "complete"
             );
         }
 
@@ -153,29 +221,78 @@ public void ChangeQuantity(string quantity)
         /// </summary>
         public string GetSelectedQuantity()
         {
-            var dropdown = new SelectElement(WaitAndFind(QuantitySelect));
-            string selected = dropdown.SelectedOption.Text.Trim();
+            // Parent div içinde input elementi bulunuyor, miktar value attribute’unda
+            var quantityInput = WaitAndFind(By.CssSelector("div.zds-quantity-selector input.zds-quantity-selector__units"));
+
+            // Input elementinin value attribute değerini al
+            string selected = quantityInput.GetAttribute("value").Trim();
+
             TestContext.WriteLine($"[INFO] Current selected quantity: {selected}");
+
             return selected;
         }
-
         /// <summary>
-        /// Removes the product from the cart.
+        /// Removes the product from the cart by clicking the remove button.
+        /// Waits until the remove button is clickable before clicking.
+        /// Handles fallback JS click if normal click fails.
         /// </summary>
         public void RemoveProduct()
         {
-            Click(RemoveButton);
-            TestContext.WriteLine("[INFO] Product removed from the cart.");
-        }
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
 
+            // Wait until the remove button is clickable
+            var removeBtn = wait.Until(driver =>
+            {
+                var element = driver.FindElement(By.CssSelector("button[aria-label='Ürünü sil']"));
+                return (element != null && element.Displayed && element.Enabled) ? element : null;
+            });
+
+            try
+            {
+                // Try to click normally
+                removeBtn.Click();
+            }
+            catch (ElementNotInteractableException)
+            {
+                // Fallback: JavaScript click if normal click fails
+                IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+                js.ExecuteScript("arguments[0].click();", removeBtn);
+            }
+
+            TestContext.WriteLine("[INFO] Remove button clicked.");
+        }
         /// <summary>
         /// Checks if the cart is empty by verifying the empty cart message.
         /// </summary>
+
+        // Locatorlar
+        By emptyCartTitle = By.XPath("//div[contains(@class,'shop-cart-view_empty-state')]//span[contains(@class,'zds-empty-state__title')]");
+
+        private readonly By EmptyCartTitle = By.XPath("//div[contains(@class,'shop-cart-view_empty-state')]//span[contains(@class,'zds-empty-state__title')]");
+
+        // In CartPage.cs
+        //private readonly By EmptyCartTitle = By.CssSelector("span.zds-empty-state__title");
+
+        public void ScrollToEmptyCartSection()
+        {
+            var parentElement = driver.FindElement(By.CssSelector("div.shop-cart-view__empty-state"));
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", parentElement);
+        }
         public bool IsCartEmpty()
         {
-            bool empty = IsVisible(EmptyCartMessage);
-            TestContext.WriteLine($"[INFO] Is cart empty: {empty}");
-            return empty;
+            try
+            {
+                var emptyTitleElement = driver.FindElement(EmptyCartTitle);
+                string text = emptyTitleElement.Text.Trim();
+                return text.Equals("SEPETİNİZ BOŞ", StringComparison.OrdinalIgnoreCase)
+                       || text.Equals("Your cart is empty", StringComparison.OrdinalIgnoreCase);
+            }
+            catch (NoSuchElementException)
+            {
+                return false;
+            }
         }
+
+
     }
 }
