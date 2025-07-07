@@ -262,11 +262,32 @@ namespace WebTests.Pages
             TestContext.WriteLine("[INFO] Remove button clicked.");
         }
 
+        // Wait until the remove button is clickable
+        var removeBtn = wait.Until(driver =>
+        {
+            var element = driver.FindElement(By.CssSelector("button[aria-label='Ürünü sil']"));
+            return (element != null && element.Displayed && element.Enabled) ? element : null;
+        });
+
+            try
+            {
+                // Try to click normally
+                removeBtn.Click();
+            }
+            catch (ElementNotInteractableException)
+            {
+                // Fallback: JavaScript click if normal click fails
+                IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+    js.ExecuteScript("arguments[0].click();", removeBtn);
+            }
+
+TestContext.WriteLine("[INFO] Remove button clicked.");
+        }
         /// <summary>
         /// After removing the product from the cart (Step 13),
         /// checks whether the empty cart message is displayed.
         /// </summary>
-        /// <param name="timeoutSeconds">Maximum wait time in seconds.</param>
+/// <param name="timeoutSeconds">Maximum wait time in seconds.</param>
         /// <returns>True if the empty cart message is visible; otherwise, false.</returns>
         /// 
 
@@ -275,8 +296,9 @@ namespace WebTests.Pages
         //private readonly By EmptyCartTitle = By.XPath("//div[contains(@class,'shop-cart-view_empty-state')]//span[contains(@class,'zds-empty-state__title')]");
 
         private readonly By EmptyCartTitle = By.XPath("//div[contains(@class,'zds-empty-state__title')]/span");
-       public bool IsCartEmptyAfterRemovingProduct(int timeoutSeconds = 10)
-{
+
+        public bool IsCartEmptyAfterRemovingProduct(int timeoutSeconds = 10)
+        {
     Console.WriteLine("[INFO] Waiting for the empty cart message after removing the product...");
 
     try
@@ -309,5 +331,3 @@ namespace WebTests.Pages
     }
 }
 
-    }
-}

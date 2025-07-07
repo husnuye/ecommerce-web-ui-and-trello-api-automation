@@ -225,9 +225,7 @@ namespace WebTests.Tests
 
                 //test block
 
-
-
-
+                // Create CartPage instance after adding product to cart
                 var cartPage = new CartPage(driver);
 
                 // Get cart price from cart page
