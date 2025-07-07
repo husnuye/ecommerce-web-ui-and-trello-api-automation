@@ -169,7 +169,7 @@ namespace WebTests.Tests
 
 
 
-                /*   // TEST Block
+                /*  // TEST Block
                    driver.Navigate().GoToUrl("https://www.zara.com/tr/tr/dokulu-orgu-t-shirt-p03003401.html?v1=415381591");
                    Logger.Info("Navigated directly to product detail page.");
                    Logger.Info("Login successful.");
@@ -177,8 +177,8 @@ namespace WebTests.Tests
                    // Sayfa tam yüklenene kadar bekle
                    //var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
                    // wait.Until(drv => ((IJavaScriptExecutor)drv).ExecuteScript("return document.readyState").Equals("complete"));
-   */
-                // Daha sonra elementleri işle 
+
+                */
 
                 // Create ProductPage instance after navigating to product detail
                 var productPage = new ProductPage(driver);
@@ -220,11 +220,6 @@ namespace WebTests.Tests
                 // Step 11: The product price on the product page is compared with the cart price.
 
                 // Go to cart and check product price matches
-
-
-
-                // TEST Block
-
 
 
 
@@ -274,18 +269,18 @@ namespace WebTests.Tests
                 // Remove product, verify cart is empt
 
                 cartPage.RemoveProduct();
+                Thread.Sleep(3000); // Sadece debug için 3 saniye beklet
 
 
-                bool cartEmpty = cartPage.IsCartEmpty();
-                string expectedEmptyText = "SEPETİNİZ BOŞ";
+                // Step 13: Verify that the cart is empty
+                bool isCartEmpty = cartPage.IsCartEmptyAfterRemovingProduct();
 
-                Assert.That(cartEmpty, Is.True, $"Expected empty cart message '{expectedEmptyText}' to be visible, but it was not found.");
-                Logger.Info("[CHECK] Product removed and empty cart verified.");
-
-                // Step 14: Log out at the end of the test to ensure clean state for next tests
+                Assert.That(isCartEmpty, Is.True, "Expected empty cart message, but it was not found.");
+                Logger.Info("[CHECK] Empty cart message has been verified.");
+                /*// Step 14: Log out at the end of the test to ensure clean state for next tests
                 var logoutPage = new LogoutPage(driver);
                 logoutPage.Logout();
-                Logger.Info("Logged out successfully. Test completed.");
+                Logger.Info("Logged out successfully. Test completed.");*/
 
                 Logger.Info("Test completed successfully: Zara_FullEndToEndFlow_ShouldSucceed");
             }

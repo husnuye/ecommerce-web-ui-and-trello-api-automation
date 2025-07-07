@@ -261,38 +261,53 @@ namespace WebTests.Pages
 
             TestContext.WriteLine("[INFO] Remove button clicked.");
         }
+
         /// <summary>
-        /// Checks if the cart is empty by verifying the empty cart message.
+        /// After removing the product from the cart (Step 13),
+        /// checks whether the empty cart message is displayed.
         /// </summary>
+        /// <param name="timeoutSeconds">Maximum wait time in seconds.</param>
+        /// <returns>True if the empty cart message is visible; otherwise, false.</returns>
+        /// 
 
-        // Locatorlar
-        By emptyCartTitle = By.XPath("//div[contains(@class,'shop-cart-view_empty-state')]//span[contains(@class,'zds-empty-state__title')]");
+        //private readonly By EmptyCartTitle = By.CssSelector("div.zds-empty-state__title > span");
 
-        private readonly By EmptyCartTitle = By.XPath("//div[contains(@class,'shop-cart-view_empty-state')]//span[contains(@class,'zds-empty-state__title')]");
+        //private readonly By EmptyCartTitle = By.XPath("//div[contains(@class,'shop-cart-view_empty-state')]//span[contains(@class,'zds-empty-state__title')]");
 
-        // In CartPage.cs
-        //private readonly By EmptyCartTitle = By.CssSelector("span.zds-empty-state__title");
+        private readonly By EmptyCartTitle = By.XPath("//div[contains(@class,'zds-empty-state__title')]/span");
+       public bool IsCartEmptyAfterRemovingProduct(int timeoutSeconds = 10)
+{
+    Console.WriteLine("[INFO] Waiting for the empty cart message after removing the product...");
 
-        public void ScrollToEmptyCartSection()
-        {
-            var parentElement = driver.FindElement(By.CssSelector("div.shop-cart-view__empty-state"));
-            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", parentElement);
-        }
-        public bool IsCartEmpty()
+    try
+    {
+        WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutSeconds));
+        return wait.Until(drv =>
         {
             try
             {
-                var emptyTitleElement = driver.FindElement(EmptyCartTitle);
+                var emptyTitleElement = drv.FindElement(EmptyCartTitle);
                 string text = emptyTitleElement.Text.Trim();
-                return text.Equals("SEPETİNİZ BOŞ", StringComparison.OrdinalIgnoreCase)
-                       || text.Equals("Your cart is empty", StringComparison.OrdinalIgnoreCase);
+                bool found = text.Equals("SEPETİNİZ BOŞ", StringComparison.OrdinalIgnoreCase)
+                          || text.Equals("Your cart is empty", StringComparison.OrdinalIgnoreCase);
+                if (found)
+                {
+                    Console.WriteLine($"[INFO] Empty cart message is visible: '{text}'");
+                }
+                return found;
             }
             catch (NoSuchElementException)
             {
                 return false;
             }
-        }
-
+        });
+    }
+    catch (WebDriverTimeoutException)
+    {
+        Console.WriteLine($"[ERROR] Failed to find empty cart message within {timeoutSeconds} seconds.");
+        return false;
+    }
+}
 
     }
 }
