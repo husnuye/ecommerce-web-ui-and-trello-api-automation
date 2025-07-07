@@ -297,8 +297,8 @@ TestContext.WriteLine("[INFO] Remove button clicked.");
 
         private readonly By EmptyCartTitle = By.XPath("//div[contains(@class,'zds-empty-state__title')]/span");
 
-        public bool IsCartEmptyAfterRemovingProduct(int timeoutSeconds = 10)
-        {
+public bool IsCartEmptyAfterRemovingProduct(int timeoutSeconds = 10)
+{
     Console.WriteLine("[INFO] Waiting for the empty cart message after removing the product...");
 
     try
