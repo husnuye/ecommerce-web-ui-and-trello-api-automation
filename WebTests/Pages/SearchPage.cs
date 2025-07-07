@@ -56,6 +56,8 @@ namespace WebTests.Pages
 
             TestContext.WriteLine("[INFO] Search input cleared by Clear() and Backspace keys until empty.");
         }
+
+        
         /// <summary>
         /// Submits the search input by pressing the Enter key.
         /// </summary>
