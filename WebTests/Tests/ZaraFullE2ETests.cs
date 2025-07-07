@@ -169,15 +169,15 @@ namespace WebTests.Tests
 
 
 
-                /*// TEST Block
-                driver.Navigate().GoToUrl("https://www.zara.com/tr/tr/dokulu-orgu-t-shirt-p03003401.html?v1=415381591");
-                Logger.Info("Navigated directly to product detail page.");
-                Logger.Info("Login successful."); */
+                /*   // TEST Block
+                   driver.Navigate().GoToUrl("https://www.zara.com/tr/tr/dokulu-orgu-t-shirt-p03003401.html?v1=415381591");
+                   Logger.Info("Navigated directly to product detail page.");
+                   Logger.Info("Login successful.");
 
-                // Sayfa tam yüklenene kadar bekle
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-                wait.Until(drv => ((IJavaScriptExecutor)drv).ExecuteScript("return document.readyState").Equals("complete"));
-
+                   // Sayfa tam yüklenene kadar bekle
+                   //var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+                   // wait.Until(drv => ((IJavaScriptExecutor)drv).ExecuteScript("return document.readyState").Equals("complete"));
+   */
                 // Daha sonra elementleri işle 
 
                 // Create ProductPage instance after navigating to product detail
@@ -227,17 +227,20 @@ namespace WebTests.Tests
 
 
 
-                var cartPage = new CartPage(driver);
 
+                //test block
+
+
+
+
+                var cartPage = new CartPage(driver);
 
                 // Get cart price from cart page
                 string cartPrice = cartPage.GetCartPrice();
 
-
+                // Parse product page and cart prices to decimals for comparison
                 decimal productPagePriceDecimal = cartPage.ParsePriceStringToDecimal(productPrice);
                 decimal cartPriceDecimal = cartPage.ParsePriceStringToDecimal(cartPrice);
-
-
 
                 // Log comparison result
                 if (cartPriceDecimal == productPagePriceDecimal)
@@ -249,28 +252,35 @@ namespace WebTests.Tests
                     Logger.Warn($"[WARN] Price mismatch. Product Page: {productPrice}, Cart: {cartPrice}");
                 }
 
+                // Step 12: Change the product quantity in the cart to 2 and verify
 
-
-                // Step 12 : The product quantity in the cart is changed to 2 and verified.
-
-                // Change quantity to 2, verify
+                // Change quantity to 2
                 cartPage.ChangeQuantity("2");
+
+                // Explicit wait to ensure quantity is updated in DOM
+                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                wait.Until(driver => cartPage.GetSelectedQuantity() == "2");
+
+                // Get selected quantity after change
                 string selectedQty = cartPage.GetSelectedQuantity();
+
+                // Assert the quantity is correctly updated
                 Assert.That(selectedQty, Is.EqualTo("2"), "Cart quantity does not match selected value");
                 Logger.Info("[CHECK] Quantity changed to 2 and verified.");
-
-
 
                 // Step 13: The product is removed from the cart and it is verified that the cart is empty.
 
 
-                // Remove product, verify cart is empty
+                // Remove product, verify cart is empt
 
                 cartPage.RemoveProduct();
-                bool cartEmpty = cartPage.IsCartEmpty();
-                Assert.That(cartEmpty, Is.True, "Cart is not empty after removing product.");
-                Logger.Info("[CHECK] Product removed and empty cart verified.");
 
+
+                bool cartEmpty = cartPage.IsCartEmpty();
+                string expectedEmptyText = "SEPETİNİZ BOŞ";
+
+                Assert.That(cartEmpty, Is.True, $"Expected empty cart message '{expectedEmptyText}' to be visible, but it was not found.");
+                Logger.Info("[CHECK] Product removed and empty cart verified.");
 
                 // Step 14: Log out at the end of the test to ensure clean state for next tests
                 var logoutPage = new LogoutPage(driver);
