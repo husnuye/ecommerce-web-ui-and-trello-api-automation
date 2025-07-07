@@ -130,7 +130,7 @@ namespace WebTests.Tests
                 searchPage.ClearSearch();
                 Logger.Info("Cleared first search input.");
                 // Add wait before submitting search
-                Thread.Sleep(1500); // give time for suggestion box or search load
+                Thread.Sleep(4000); // give time for suggestion box or search load
 
 
 

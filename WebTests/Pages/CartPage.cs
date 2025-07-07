@@ -22,6 +22,7 @@ namespace WebTests.Pages
 
 
 
+
         public CartPage(IWebDriver driver) : base(driver) { }
 
 
@@ -45,6 +46,7 @@ namespace WebTests.Pages
         /// <param name="priceText">The price string to convert.</param>
         /// <returns>The decimal representation of the price.</returns>
         /// <exception cref="FormatException">Thrown if the price string cannot be parsed into a decimal.</exception>
+
         public decimal ParsePriceStringToDecimal(string priceText)
         {
             // Split multiline text into individual lines
@@ -69,6 +71,19 @@ namespace WebTests.Pages
             // Parse the cleaned string into a decimal
             return decimal.Parse(cleaned, CultureInfo.InvariantCulture);
         }
+
+
+        /// <summary>
+        /// Waits until the page is fully loaded (document.readyState === 'complete').
+        /// </summary>
+        private void WaitUntilPageLoad(int timeoutInSeconds = 15)
+        {
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutInSeconds));
+            wait.Until(d =>
+                ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").ToString() == "complete"
+            );
+        }
+
 
         //
         /// <summary>
@@ -179,42 +194,7 @@ namespace WebTests.Pages
                 TestContext.WriteLine($"[ERROR] Failed to change quantity to {quantity}: {ex.Message}");
             }
         }
-        /// <summary>
-        /// Waits until the page is fully loaded (document.readyState === 'complete').
-        /// </summary>
-        private void WaitUntilPageLoad(int timeoutInSeconds = 15)
-        {
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutInSeconds));
-            wait.Until(d =>
-                ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").ToString() == "complete"
-            );
-        }
 
-        /// <summary>
-        /// Checks if an element is present within the specified timeout (in seconds).
-        /// </summary>
-        private bool IsElementPresent(By by, int timeoutInSeconds)
-        {
-            try
-            {
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutInSeconds));
-                wait.Until(drv => drv.FindElements(by).Count > 0);
-                return true;
-            }
-            catch (WebDriverTimeoutException)
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Scrolls the element into view to ensure it is visible.
-        /// </summary>
-        private void EnsureElementVisible(By by)
-        {
-            var element = driver.FindElement(by);
-            jsExecutor.ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", element);
-        }
 
         /// <summary>
         /// Returns the currently selected quantity in the cart.
@@ -262,72 +242,46 @@ namespace WebTests.Pages
             TestContext.WriteLine("[INFO] Remove button clicked.");
         }
 
-        // Wait until the remove button is clickable
-        var removeBtn = wait.Until(driver =>
-        {
-            var element = driver.FindElement(By.CssSelector("button[aria-label='Ürünü sil']"));
-            return (element != null && element.Displayed && element.Enabled) ? element : null;
-        });
-
-            try
-            {
-                // Try to click normally
-                removeBtn.Click();
-            }
-            catch (ElementNotInteractableException)
-            {
-                // Fallback: JavaScript click if normal click fails
-                IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-    js.ExecuteScript("arguments[0].click();", removeBtn);
-            }
-
-TestContext.WriteLine("[INFO] Remove button clicked.");
-        }
         /// <summary>
         /// After removing the product from the cart (Step 13),
         /// checks whether the empty cart message is displayed.
         /// </summary>
-/// <param name="timeoutSeconds">Maximum wait time in seconds.</param>
         /// <returns>True if the empty cart message is visible; otherwise, false.</returns>
-        /// 
-
-        //private readonly By EmptyCartTitle = By.CssSelector("div.zds-empty-state__title > span");
-
-        //private readonly By EmptyCartTitle = By.XPath("//div[contains(@class,'shop-cart-view_empty-state')]//span[contains(@class,'zds-empty-state__title')]");
 
         private readonly By EmptyCartTitle = By.XPath("//div[contains(@class,'zds-empty-state__title')]/span");
 
-public bool IsCartEmptyAfterRemovingProduct(int timeoutSeconds = 10)
-{
-    Console.WriteLine("[INFO] Waiting for the empty cart message after removing the product...");
-
-    try
-    {
-        WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutSeconds));
-        return wait.Until(drv =>
+        public bool IsCartEmptyAfterRemovingProduct(int timeoutSeconds = 10)
         {
+            Console.WriteLine("[INFO] Waiting for the empty cart message after removing the product...");
+
             try
             {
-                var emptyTitleElement = drv.FindElement(EmptyCartTitle);
-                string text = emptyTitleElement.Text.Trim();
-                bool found = text.Equals("SEPETİNİZ BOŞ", StringComparison.OrdinalIgnoreCase)
-                          || text.Equals("Your cart is empty", StringComparison.OrdinalIgnoreCase);
-                if (found)
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutSeconds));
+                return wait.Until(drv =>
                 {
-                    Console.WriteLine($"[INFO] Empty cart message is visible: '{text}'");
-                }
-                return found;
+                    try
+                    {
+                        var emptyTitleElement = drv.FindElement(EmptyCartTitle);
+                        string text = emptyTitleElement.Text.Trim();
+                        bool found = text.Equals("SEPETİNİZ BOŞ", StringComparison.OrdinalIgnoreCase)
+                                  || text.Equals("Your cart is empty", StringComparison.OrdinalIgnoreCase);
+                        if (found)
+                        {
+                            Console.WriteLine($"[INFO] Empty cart message is visible: '{text}'");
+                        }
+                        return found;
+                    }
+                    catch (NoSuchElementException)
+                    {
+                        return false;
+                    }
+                });
             }
-            catch (NoSuchElementException)
+            catch (WebDriverTimeoutException)
             {
+                Console.WriteLine($"[ERROR] Failed to find empty cart message within {timeoutSeconds} seconds.");
                 return false;
             }
-        });
-    }
-    catch (WebDriverTimeoutException)
-    {
-        Console.WriteLine($"[ERROR] Failed to find empty cart message within {timeoutSeconds} seconds.");
-        return false;
+        }
     }
 }
-
