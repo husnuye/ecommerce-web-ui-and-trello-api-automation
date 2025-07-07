@@ -401,94 +401,136 @@ namespace WebTests.Pages
             }
         }
 
-public void ForceClickWithScrollAndHover(IWebElement element, int scrollOffset = -150, int timeoutSeconds = 15)
-{
-    try
-    {
-        // 1. Overlay varsa bekle
-        WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutSeconds));
-        wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions
-            .InvisibilityOfElementLocated(By.CssSelector(".add-to-cart-notification-content")));
-    }
-    catch
-    {
-        Console.WriteLine("[WARN] Overlay kontrolü geçilemedi. Devam ediliyor.");
-    }
-
-    try
-    {
-        // 2. Scroll offset ile yukarıda bırak
-        var js = (IJavaScriptExecutor)driver;
-        js.ExecuteScript("arguments[0].scrollIntoView(true); window.scrollBy(0, arguments[1]);", element, scrollOffset);
-
-        // 3. Hover
-        Actions actions = new Actions(driver);
-        actions.MoveToElement(element).Perform();
-
-        // 4. Force click via JavaScript
-        js.ExecuteScript("arguments[0].click();", element);
-
-        Console.WriteLine("[INFO] Element force clicked with scroll & hover.");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"[ERROR] ForceClickWithScrollAndHover failed: {ex.Message}");
-        throw;
-    }
-}
-public void ForceClickWithScrollAndHover(By by)
-{
-    var element = WaitAndFind(by);
-    ForceClickWithScrollAndHover(element);
-}
-
-public void ForceClickWithScrollAndHover(IWebElement element)
-{
-    try
-    {
-        ScrollToElementWithOffset(element, 150); // 150px yukarıdan hizala
-        Hover(element);                          // Üzerine gel (hover)
-        ClickWithRetriesAndJsFallback(element);  // Normal click + JS fallback
-    }
-    catch (Exception ex)
-    {
-        TestContext.WriteLine($"[ERROR] ForceClickWithScrollAndHover failed: {ex.Message}");
-        throw;
-    }
-}
-
-/// <summary>
-/// Attempts to click the element up to 3 times, falling back to JS click if needed.
-/// </summary>
-protected void ClickWithRetriesAndJsFallback(IWebElement element)
-{
-    Exception lastEx = null;
-    for (int i = 0; i < 3; i++)
-    {
-        try
+        public void ForceClickWithScrollAndHover(IWebElement element, int scrollOffset = -150, int timeoutSeconds = 15)
         {
-            element.Click();
-            TestContext.WriteLine("[INFO] Clicked element successfully.");
-            return;
+            try
+            {
+                // 1. Overlay varsa bekle
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutSeconds));
+                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions
+                    .InvisibilityOfElementLocated(By.CssSelector(".add-to-cart-notification-content")));
+            }
+            catch
+            {
+                Console.WriteLine("[WARN] Overlay kontrolü geçilemedi. Devam ediliyor.");
+            }
+
+            try
+            {
+                // 2. Scroll offset ile yukarıda bırak
+                var js = (IJavaScriptExecutor)driver;
+                js.ExecuteScript("arguments[0].scrollIntoView(true); window.scrollBy(0, arguments[1]);", element, scrollOffset);
+
+                // 3. Hover
+                Actions actions = new Actions(driver);
+                actions.MoveToElement(element).Perform();
+
+                // 4. Force click via JavaScript
+                js.ExecuteScript("arguments[0].click();", element);
+
+                Console.WriteLine("[INFO] Element force clicked with scroll & hover.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] ForceClickWithScrollAndHover failed: {ex.Message}");
+                throw;
+            }
         }
-        catch (Exception ex)
+        public void ForceClickWithScrollAndHover(By by)
         {
-            lastEx = ex;
-            TestContext.WriteLine($"[WARN] Click attempt {i + 1} failed: {ex.Message}");
-            System.Threading.Thread.Sleep(200);
+            var element = WaitAndFind(by);
+            ForceClickWithScrollAndHover(element);
         }
-    }
-    try
-    {
-        jsExecutor.ExecuteScript("arguments[0].click();", element);
-        TestContext.WriteLine("[INFO] JS fallback click succeeded.");
-    }
-    catch (Exception ex)
-    {
-        TestContext.WriteLine($"[ERROR] JS fallback click failed: {ex.Message}");
-        throw;
-    }
-}
+
+        public void ForceClickWithScrollAndHover(IWebElement element)
+        {
+            try
+            {
+                ScrollToElementWithOffset(element, 150); // 150px yukarıdan hizala
+                Hover(element);                          // Üzerine gel (hover)
+                ClickWithRetriesAndJsFallback(element);  // Normal click + JS fallback
+            }
+            catch (Exception ex)
+            {
+                TestContext.WriteLine($"[ERROR] ForceClickWithScrollAndHover failed: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Attempts to click the element up to 3 times, falling back to JS click if needed.
+        /// </summary>
+        protected void ClickWithRetriesAndJsFallback(IWebElement element)
+        {
+            Exception lastEx = null;
+            for (int i = 0; i < 3; i++)
+            {
+                try
+                {
+                    element.Click();
+                    TestContext.WriteLine("[INFO] Clicked element successfully.");
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    lastEx = ex;
+                    TestContext.WriteLine($"[WARN] Click attempt {i + 1} failed: {ex.Message}");
+                    System.Threading.Thread.Sleep(200);
+                }
+            }
+            try
+            {
+                jsExecutor.ExecuteScript("arguments[0].click();", element);
+                TestContext.WriteLine("[INFO] JS fallback click succeeded.");
+            }
+            catch (Exception ex)
+            {
+                TestContext.WriteLine($"[ERROR] JS fallback click failed: {ex.Message}");
+                throw;
+            }
+        }
+
+
+
+
+
+        /// <summary>
+        /// Waits until the page is fully loaded (document.readyState === 'complete').
+        /// </summary>
+        private void WaitUntilPageLoad(int timeoutInSeconds = 15)
+        {
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutInSeconds));
+            wait.Until(d =>
+                ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").ToString() == "complete"
+            );
+        }
+
+
+        /// <summary>
+        /// Checks if an element is present within the specified timeout (in seconds).
+        /// </summary>
+        private bool IsElementPresent(By by, int timeoutInSeconds)
+        {
+            try
+            {
+                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutInSeconds));
+                wait.Until(drv => drv.FindElements(by).Count > 0);
+                return true;
+            }
+            catch (WebDriverTimeoutException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Scrolls the element into view to ensure it is visible.
+        /// </summary>
+        private void EnsureElementVisible(By by)
+        {
+            var element = driver.FindElement(by);
+            jsExecutor.ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", element);
+        }
 
 
 
