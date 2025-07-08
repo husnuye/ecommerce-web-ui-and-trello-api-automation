@@ -1,5 +1,7 @@
 # 🛒 E-commerce Web UI & Trello API Test Automation
 
+**🚀 [Watch Demo Video (Vimeo)](https://vimeo.com/1099626336) 🚀**
+
 [![.NET](https://img.shields.io/badge/.NET-9.0-blue?logo=dotnet)](https://dotnet.microsoft.com/)
 [![Selenium](https://img.shields.io/badge/Selenium-WebDriver-green?logo=selenium)](https://www.selenium.dev/)
 [![NUnit](https://img.shields.io/badge/NUnit-Testing-red?logo=nunit)](https://nunit.org/)
