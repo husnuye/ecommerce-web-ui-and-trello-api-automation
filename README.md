@@ -56,6 +56,6 @@ ecommerce-web-ui-and-trello-api-automation/
 ---
 
 **License:** MIT  
-**Contact:** [LinkedIn](https://www.linkedin.com/in/husnuye/)
+**Contact:** [LinkedIn](https://www.linkedin.com/in/husnuyeyasar/)
 
 > _This project is for educational and demonstration purposes only and is not affiliated with Zara, Inditex, or Trello._
