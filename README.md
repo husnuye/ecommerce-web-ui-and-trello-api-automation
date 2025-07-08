@@ -41,7 +41,7 @@ ecommerce-web-ui-and-trello-api-automation/
 
 ## 🎥 Demo
 
-> [![Watch Demo Video](https://img.shields.io/badge/Demo-Video-blue?logo=youtube)](VIMEO_YA_DA_YOUTUBE_LINKİNİ_BURAYA_KOY)
+> [![Watch Demo Video](https://img.shields.io/badge/Demo-Video-blue?logo=vimeo)](https://vimeo.com/manage/videos/1099626336)
 
 ---
 
