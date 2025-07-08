@@ -42,9 +42,11 @@ Create `Config/api.settings.json` as below:
   "Token": "YOUR_TRELLO_TOKEN"
 }
 
+---
+
 ⚠️ Do NOT share your real credentials. Commit only api.settings.sample.json to the repository!
 
-⸻
+---
 
 🚪 How to Run Tests / Testler Nasıl Çalıştırılır?
 
@@ -52,6 +54,8 @@ Terminal:
 cd ApiTests
 cp Config/api.settings.json bin/Debug/net9.0/Config/
 dotnet test
+
+---
 
 📊 Test Flow / Test Akışı
 	1.	Create Trello Board
@@ -61,19 +65,22 @@ dotnet test
 	5.	Delete cards
 	6.	Delete board
 
+---
+
 EN:
 All steps above are performed automatically. Logs and results are printed to the terminal.
 
 TR:
 Yukarıdaki adımlar otomatik olarak yürütülür. Log ve sonuçlar terminalde gösterilir.
 
-⸻
 Board created: abc123
 List retrieved: xyz456
 Cards created: card1, card2
 Card updated: card1
 Cards deleted.
 Board deleted.
+
+---
 
 🔐 API Configuration
 	•	NEVER commit your real api.settings.json file.
@@ -90,7 +97,7 @@ cp ApiTests/Config/api.settings.sample.json ApiTests/Config/api.settings.json
 	•	Add api.settings.json to your .gitignore.
 	•	All logs use TestContext.WriteLine() for traceability.
 
-⸻
+---
 
 🙌 Contributions / Katkılar
 
@@ -100,12 +107,11 @@ Pull requests are welcome. Feel free to contribute additional features, models, 
 TR:
 Pull request’ler açıktır. Ek özellik, model veya test senaryosu ekleyebilirsiniz.
 
-⸻
+---
 
 🌍 License / Lisans
 
 MIT
-
-⸻
+---
 
 Author / Yazar: github.com/husnuye
