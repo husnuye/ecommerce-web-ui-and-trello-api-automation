@@ -2,40 +2,38 @@
 
 ## 🔧 Project Description / Proje Açıklaması
 
-**EN:**
-This project demonstrates automated API testing of Trello using C#, NUnit, and RestSharp. It performs full CRUD operations (Create, Read, Update, Delete) for Trello Boards and Cards.
+**EN:**  
+This project demonstrates automated API testing of Trello using C#, NUnit, and RestSharp. It covers full CRUD operations (Create, Read, Update, Delete) for Trello Boards and Cards.
 
-**TR:**
-Bu proje, Trello API'leri üzerinde C#, NUnit ve RestSharp kullanarak otomatik testlerin gerçekleştirildiği bir uygulamadır. Board ve Card işlemleri için tam CRUD (oluşur, oku, güncelle, sil) süreçleri test edilmektedir.
+**TR:**  
+Bu proje, Trello API üzerinde C#, NUnit ve RestSharp kullanarak otomatik testler içerir. Board ve Card işlemleri için tam CRUD (oluştur, oku, güncelle, sil) süreçlerini kapsar.
 
 ---
 
 ## 🚀 Technologies Used / Kullanılan Teknolojiler
 
-* C# (.NET 9.0)
-* NUnit
-* RestSharp
-* Newtonsoft.Json
-* Microsoft.Extensions.Configuration.Json
+- **C# (.NET 9.0)**
+- **NUnit**
+- **RestSharp**
+- **Newtonsoft.Json**
+- **Microsoft.Extensions.Configuration.Json**
 
 ---
 
 ## 📂 Folder Structure / Klasör Yapısı
 
-```
-ApiTests
- ├── Config          → ConfigHelper & api.settings.json
- ├── Core            → ApiClient (request handler)
- ├── Models          → BoardModel.cs, CardModel.cs
- ├── Utils           → JsonHelper.cs (future), ConfigHelper.cs
- ├── Tests           → TrelloBoardTests.cs (main test file)
-```
+ApiTests/
+├── Config      # ConfigHelper & api.settings.json
+├── Core        # ApiClient (request handler)
+├── Models      # BoardModel.cs, CardModel.cs
+├── Utils       # JsonHelper.cs (future), ConfigHelper.cs
+└── Tests       # TrelloBoardTests.cs (main test file)
 
 ---
 
 ## 📃 Configuration / Yapılandırma
 
-> `Config/api.settings.json` dosyasını oluşturun ve aşağıdaki gibi doldurun:
+Create `Config/api.settings.json` as below:
 
 ```json
 {
@@ -43,93 +41,71 @@ ApiTests
   "ApiKey": "YOUR_TRELLO_API_KEY",
   "Token": "YOUR_TRELLO_TOKEN"
 }
-```
 
----
+⚠️ Do NOT share your real credentials. Commit only api.settings.sample.json to the repository!
 
-## 🚪 How to Run Tests / Testler Nasıl Çalıştırılır?
+⸻
 
-**Terminalden:**
+🚪 How to Run Tests / Testler Nasıl Çalıştırılır?
 
-```bash
+Terminal:
 cd ApiTests
 cp Config/api.settings.json bin/Debug/net9.0/Config/
 dotnet test
-```
 
----
+📊 Test Flow / Test Akışı
+	1.	Create Trello Board
+	2.	Get list from the board
+	3.	Create two cards
+	4.	Randomly update a card
+	5.	Delete cards
+	6.	Delete board
 
-## 📊 Test Flow / Test Akışı
+EN:
+All steps above are performed automatically. Logs and results are printed to the terminal.
 
-1. Create Trello Board
-2. Get List from Board
-3. Create Two Cards
-4. Randomly Update a Card
-5. Delete Cards
-6. Delete Board
+TR:
+Yukarıdaki adımlar otomatik olarak yürütülür. Log ve sonuçlar terminalde gösterilir.
 
-**EN:**
-All tests automatically perform these steps when executed and log the outputs to the terminal.
-
-**TR:**
-Tüm testler, çalıştığında otomatik olarak bu adımları gerçekleştirir ve logları terminale yazar.
-
----
-
-## 🎨 Sample Output / Örnek Çıktı
-
-```bash
+⸻
 Board created: abc123
 List retrieved: xyz456
 Cards created: card1, card2
 Card updated: card1
 Cards deleted.
 Board deleted.
-```
 
-## 🔐 API Configuration
+🔐 API Configuration
+	•	NEVER commit your real api.settings.json file.
+	•	Use api.settings.sample.json as a template for others.
 
-To protect your sensitive Trello credentials:
+To run:
+EN: Copy the sample file and fill your credentials.
+TR: Örnek dosyayı kopyalayıp kendi Trello bilgilerinizi girin.
 
-- Do **NOT** commit the real `api.settings.json` file.
-- Instead, use `api.settings.sample.json` to share the structure.
+cp ApiTests/Config/api.settings.sample.json ApiTests/Config/api.settings.json
 
-**To run the tests:**
+🛡️ Notes / Notlar
+	•	Do NOT share your API key or token with anyone.
+	•	Add api.settings.json to your .gitignore.
+	•	All logs use TestContext.WriteLine() for traceability.
 
-1. Copy the sample file:
-   ```bash
-   cp ApiTests/Config/api.settings.sample.json ApiTests/Config/api.settings.json
+⸻
 
----
+🙌 Contributions / Katkılar
 
+EN:
+Pull requests are welcome. Feel free to contribute additional features, models, or test cases.
 
-**EN:**
-📌 To run the tests, copy `api.settings.sample.json` → `api.settings.json` and fill in your own Trello credentials.
+TR:
+Pull request’ler açıktır. Ek özellik, model veya test senaryosu ekleyebilirsiniz.
 
+⸻
 
-**EN:**
-📌 Testleri çalıştırmak için `api.settings.sample.json` dosyasını `api.settings.json` olarak kopyalayın ve kendi Trello bilgilerinizi girin.
-
-
-## 🛡️ Notes / Notlar
-
-* API key ve token bilgilerinizi **kimseyle paylaşmayın**.
-* `api.settings.json` dosyasını `.gitignore` listesine ekleyin.
-* Geliştirme yaparken test çıktıları `TestContext.WriteLine()` ile loglanmıştır.
-
----
-
-## 🙌 Contributions / Katkılar
-
-**EN:**
-Pull requests are welcome. Feel free to contribute with additional features, models, or test scenarios.
-
-**EN:**
-Pull request'ler açıktır. Ek işlemler, model ya da test senaryoları eklemekten çekinmeyin.
-
----
-
-
-## 🌍 License / Lisans
+🌍 License / Lisans
 
 MIT
+
+⸻
+
+Author / Yazar: github.com/husnuye
