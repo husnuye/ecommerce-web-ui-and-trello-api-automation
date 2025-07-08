@@ -35,7 +35,7 @@ ApiTests/
 
 Create `Config/api.settings.json` as below:
 
-```json
+json
 {
   "BaseUrl": "https://api.trello.com/1/",
   "ApiKey": "YOUR_TRELLO_API_KEY",
